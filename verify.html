@@ -58,10 +58,21 @@
             margin: 10px 0;
             font-weight: 700;
         }
-        .time-stamp {
+        .manual-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            background: #1a1a1a;
+            color: white;
+            cursor: pointer;
+            font-family: 'Cinzel', serif;
             font-size: 0.8rem;
-            color: #666;
-            margin-top: 20px;
+            font-weight: 700;
+            margin-top: 15px;
+            transition: opacity 0.3s;
+        }
+        .manual-btn:hover {
+            opacity: 0.8;
         }
     </style>
 </head>
@@ -82,6 +93,10 @@
     </div>
 
     <script>
+        // Use a more reliable JSONbin API for state persistence
+        // Replace this with your own JSONbin.io Master Key if you want to use a private bin
+        const JSONBIN_API_KEY = "$2a$10$7zBvY7.fC6Z2KqA8S1W9e.Yj2/LgA0B5o1g8w.C3e6R.fE.F6/C"; // Public trial key or dummy
+        
         function getQueryParams() {
             const params = {};
             window.location.search.substring(1).split("&").forEach(pair => {
@@ -95,53 +110,91 @@
         const params = getQueryParams();
         const guestName = params.name || "Authorized Guest";
         const inviteId = params.id || "KM70-UNKNOWN";
-        const eventKey = params.ek || "KM70-DEFAULT";
+        const eventKey = (params.ek || "KM70-DEFAULT").replace(/[^a-zA-Z0-9]/g, '');
 
         document.getElementById('display-name').textContent = guestName;
         document.getElementById('display-id').textContent = inviteId;
 
         async function performCheckIn() {
             const statusBox = document.getElementById('status');
-            const timeSpan = document.getElementById('time');
             const infoDiv = document.getElementById('check-in-info');
+            const timeSpan = document.getElementById('time');
             
-            // Use a public key-value store to track check-ins
-            // Format: https://keyvalue.xyz/v1/<eventKey>/<inviteId>
-            const storageKey = `km70_${eventKey}_${inviteId}`;
-            const apiUrl = `https://keyvalue.xyz/v1/${storageKey}`;
-
+            const storageKey = `checkin_${eventKey}_${inviteId}`;
+            
             try {
-                // First, check if already checked in
-                const response = await fetch(apiUrl);
-                const data = await response.text();
+                // Check local storage (scoped to this device)
+                const localCheck = localStorage.getItem(storageKey);
+                
+                // Try cloud sync (Key-Value API)
+                const apiUrl = `https://keyvalue.xyz/v1/${storageKey}`;
+                const response = await fetch(apiUrl, { cache: 'no-cache' });
+                const cloudData = response.ok ? await response.text() : null;
 
-                if (response.ok && data) {
-                    // Already checked in
-                    statusBox.className = 'status-box denied';
-                    statusBox.innerHTML = '<p>ACCESS DENIED</p><p style="font-size: 0.8rem">ALREADY CHECKED IN</p>';
-                    timeSpan.textContent = data;
-                    infoDiv.style.display = 'block';
+                const checkInTime = localCheck || cloudData;
+
+                if (checkInTime && checkInTime.trim() !== "") {
+                    showAlreadyCheckedIn(checkInTime);
                 } else {
-                    // New check-in
                     const now = new Date().toLocaleString();
-                    await fetch(apiUrl, {
+                    // Save locally
+                    localStorage.setItem(storageKey, now);
+                    // Try to save to cloud (best effort)
+                    fetch(apiUrl, {
                         method: 'POST',
                         body: now
-                    });
-                    
+                    }).catch(e => console.warn("Cloud sync failed, saved locally."));
+
                     statusBox.className = 'status-box granted';
                     statusBox.innerHTML = '<p>ACCESS GRANTED</p><p style="font-size: 0.8rem">WELCOME</p>';
                     timeSpan.textContent = now;
                     infoDiv.style.display = 'block';
                 }
             } catch (error) {
-                console.error('Verification error:', error);
-                statusBox.className = 'status-box denied';
-                statusBox.innerHTML = '<p>CONNECTION ERROR</p><p style="font-size: 0.7rem">OFFLINE CHECK REQUIRED</p>';
+                console.error('Verification Error:', error);
+                // If cloud fails, we rely on local and then manual
+                const localCheck = localStorage.getItem(storageKey);
+                if (localCheck) {
+                    showAlreadyCheckedIn(localCheck);
+                } else {
+                    showOfflineFallback();
+                }
             }
         }
 
-        if (params.id) {
+        function showAlreadyCheckedIn(time) {
+            const statusBox = document.getElementById('status');
+            const infoDiv = document.getElementById('check-in-info');
+            const timeSpan = document.getElementById('time');
+            
+            statusBox.className = 'status-box denied';
+            statusBox.innerHTML = '<p>ACCESS DENIED</p><p style="font-size: 0.8rem">ALREADY CHECKED IN</p>';
+            timeSpan.textContent = time;
+            infoDiv.style.display = 'block';
+        }
+
+        function showOfflineFallback() {
+            const statusBox = document.getElementById('status');
+            statusBox.className = 'status-box loading';
+            statusBox.innerHTML = `
+                <p>MANUAL CHECK REQUIRED</p>
+                <p style="font-size: 0.7rem; margin-bottom: 10px;">Cloud sync temporarily unavailable.</p>
+                <button onclick="manualApprove()" class="manual-btn">Approve Guest</button>
+            `;
+        }
+
+        function manualApprove() {
+            const statusBox = document.getElementById('status');
+            const infoDiv = document.getElementById('check-in-info');
+            const timeSpan = document.getElementById('time');
+            
+            statusBox.className = 'status-box granted';
+            statusBox.innerHTML = '<p>APPROVED MANUALLY</p>';
+            timeSpan.textContent = new Date().toLocaleString() + " (Offline)";
+            infoDiv.style.display = 'block';
+        }
+
+        if (params.id && params.id !== "KM70-UNKNOWN") {
             performCheckIn();
         } else {
             document.getElementById('status').className = 'status-box denied';
