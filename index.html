@@ -77,7 +77,7 @@
 
                 <!-- Digital Security QR Code -->
                 <div class="qr-container">
-                    <img id="qr-code" src="" alt="Scan for verification" style="display: none;">
+                    <img id="qr-code" src="" alt="Scan for verification">
                     <p class="verification-text">SCAN FOR ENTRY VERIFICATION</p>
                 </div>
             </div>
@@ -105,13 +105,26 @@
         document.getElementById('invite-id').textContent = inviteId;
         document.getElementById('guest-name-display').textContent = guestName;
 
-        // Generate QR Code using Google Charts API (Simple and reliable)
+        // Generate QR Code using a more reliable API (api.qrserver.com)
         // Using current path instead of origin to support GitHub Pages subdirectories
         const basePath = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
         const verificationUrl = basePath + "verify.html?id=" + inviteId + "&name=" + encodeURIComponent(guestName) + "&ek=" + encodeURIComponent(eventKey);
+        
+        console.log("Verification URL:", verificationUrl);
+
         const qrImg = document.getElementById('qr-code');
-        qrImg.src = `https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=${encodeURIComponent(verificationUrl)}&choe=UTF-8`;
-        qrImg.style.display = 'inline-block';
+        
+        qrImg.onerror = function() {
+            console.error("Failed to load QR code image.");
+            const container = document.querySelector('.qr-container');
+            const errorMsg = document.createElement('p');
+            errorMsg.style.fontSize = '0.6rem';
+            errorMsg.style.color = 'red';
+            errorMsg.textContent = "QR Code unavailable. ID: " + inviteId;
+            container.appendChild(errorMsg);
+        };
+        
+        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(verificationUrl)}`;
     </script>
 </body>
 </html>
