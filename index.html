@@ -14,8 +14,8 @@
         <div class="card">
             <!-- Security and Numbering -->
             <div class="card-header-meta">
-                <div class="card-number">CARD NO: _________</div>
-                <div class="guest-name">TO: ____________________________</div>
+                <div class="card-number">INVITE ID: <span id="invite-id">KM70-XXXX</span></div>
+                <div class="guest-name">TO: <span id="guest-name-display">____________________________</span></div>
             </div>
 
             <!-- Corner Ornaments -->
@@ -74,8 +74,44 @@
                         <p>MRS NAMAKAU KABWE: 0977704519</p>
                     </div>
                 </div>
+
+                <!-- Digital Security QR Code -->
+                <div class="qr-container">
+                    <img id="qr-code" src="" alt="Scan for verification" style="display: none;">
+                    <p class="verification-text">SCAN FOR ENTRY VERIFICATION</p>
+                </div>
             </div>
         </div>
     </div>
+
+    <script>
+        // Digital Security Logic
+        function getQueryParams() {
+            const params = {};
+            window.location.search.substring(1).split("&").forEach(pair => {
+                if (pair === "") return;
+                const [key, value] = pair.split("=");
+                params[decodeURIComponent(key)] = decodeURIComponent(value);
+            });
+            return params;
+        }
+
+        const params = getQueryParams();
+        const inviteId = params.id || "KM70-" + Math.random().toString(36).substr(2, 6).toUpperCase();
+        const guestName = params.name || "Valued Guest";
+        const eventKey = params.ek || "KM70-DEFAULT";
+
+        // Update card with dynamic data
+        document.getElementById('invite-id').textContent = inviteId;
+        document.getElementById('guest-name-display').textContent = guestName;
+
+        // Generate QR Code using Google Charts API (Simple and reliable)
+        // Using current path instead of origin to support GitHub Pages subdirectories
+        const basePath = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+        const verificationUrl = basePath + "verify.html?id=" + inviteId + "&name=" + encodeURIComponent(guestName) + "&ek=" + encodeURIComponent(eventKey);
+        const qrImg = document.getElementById('qr-code');
+        qrImg.src = `https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=${encodeURIComponent(verificationUrl)}&choe=UTF-8`;
+        qrImg.style.display = 'inline-block';
+    </script>
 </body>
 </html>

@@ -63,6 +63,15 @@ body {
     letter-spacing: 1px;
 }
 
+#invite-id {
+    color: #888;
+}
+
+#guest-name-display {
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 2px;
+}
+
 .guest-name {
     text-align: right;
 }
@@ -181,6 +190,28 @@ body {
     font-weight: 700;
     line-height: 1.8;
     letter-spacing: 1px;
+}
+
+/* Digital Security */
+.qr-container {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#qr-code {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 5px;
+    filter: grayscale(100%);
+}
+
+.verification-text {
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    font-family: 'Cinzel', serif;
+    color: #666;
 }
 
 @media print {
