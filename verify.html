@@ -121,44 +121,47 @@
             const timeSpan = document.getElementById('time');
             
             const storageKey = `checkin_${eventKey}_${inviteId}`;
+            const now = new Date().toLocaleString();
             
             try {
-                // Check local storage (scoped to this device)
-                const localCheck = localStorage.getItem(storageKey);
-                
-                // Try cloud sync (Key-Value API)
-                const apiUrl = `https://keyvalue.xyz/v1/${storageKey}`;
-                const response = await fetch(apiUrl, { cache: 'no-cache' });
-                const cloudData = response.ok ? await response.text() : null;
-
-                const checkInTime = localCheck || cloudData;
-
-                if (checkInTime && checkInTime.trim() !== "") {
-                    showAlreadyCheckedIn(checkInTime);
-                } else {
-                    const now = new Date().toLocaleString();
-                    // Save locally
-                    localStorage.setItem(storageKey, now);
-                    // Try to save to cloud (best effort)
-                    fetch(apiUrl, {
-                        method: 'POST',
-                        body: now
-                    }).catch(e => console.warn("Cloud sync failed, saved locally."));
-
-                    statusBox.className = 'status-box granted';
-                    statusBox.innerHTML = '<p>ACCESS GRANTED</p><p style="font-size: 0.8rem">WELCOME</p>';
-                    timeSpan.textContent = now;
-                    infoDiv.style.display = 'block';
-                }
-            } catch (error) {
-                console.error('Verification Error:', error);
-                // If cloud fails, we rely on local and then manual
+                // 1. Check local storage first (instant)
                 const localCheck = localStorage.getItem(storageKey);
                 if (localCheck) {
                     showAlreadyCheckedIn(localCheck);
-                } else {
-                    showOfflineFallback();
+                    return;
                 }
+
+                // 2. Try cloud check (may fail due to CORS)
+                const apiUrl = `https://keyvalue.xyz/v1/${storageKey}`;
+                const response = await fetch(apiUrl, { cache: 'no-cache' }).catch(() => null);
+                
+                if (response && response.ok) {
+                    const cloudData = await response.text();
+                    if (cloudData && cloudData.trim() !== "") {
+                        showAlreadyCheckedIn(cloudData);
+                        localStorage.setItem(storageKey, cloudData); // Sync local with cloud
+                        return;
+                    }
+                }
+
+                // 3. If we reach here, it's a NEW check-in (or offline first-time)
+                localStorage.setItem(storageKey, now);
+                
+                // Show success immediately
+                statusBox.className = 'status-box granted';
+                statusBox.innerHTML = '<p>ACCESS GRANTED</p><p style="font-size: 0.8rem">WELCOME</p>';
+                timeSpan.textContent = now + (response ? "" : " (Local)");
+                infoDiv.style.display = 'block';
+
+                // Try to update cloud in background
+                if (response) {
+                    fetch(apiUrl, { method: 'POST', body: now }).catch(() => {});
+                }
+
+            } catch (error) {
+                console.error('Verification Error:', error);
+                // Last resort fallback
+                showOfflineFallback();
             }
         }
 
