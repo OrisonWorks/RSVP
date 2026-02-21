@@ -2,7 +2,7 @@ import subprocess
 from pathlib import Path
 
 BASE_URL = "https://orisonworks.github.io/RSVP/index.html?id="
-OUTPUT_DIR = Path("pdf")
+OUTPUT_DIR = Path(__file__).parent / "pdf"
 OUTPUT_DIR.mkdir(exist_ok=True)
 
 CHROME_PATHS = [
@@ -25,13 +25,24 @@ for i in range(1, 121):
     invite_id = f"KM70-{i:03d}"
     url = f"{BASE_URL}{invite_id}"
     output_file = OUTPUT_DIR / f"{invite_id}.pdf"
-    subprocess.run([
-        browser,
-        "--headless",
-        "--disable-gpu",
-        "--no-sandbox",
-        f"--print-to-pdf={output_file}",
-        url
-    ], check=True)
+    if output_file.exists():
+        print(f"Skipping {invite_id} (already exists)")
+        continue
+    try:
+        subprocess.run([
+            browser,
+            "--headless=new",
+            "--disable-gpu",
+            "--no-sandbox",
+            "--disable-extensions",
+            "--disable-background-networking",
+            f"--print-to-pdf={output_file}",
+            url
+        ], check=True, timeout=60)
+        print(f"Generated {invite_id}")
+    except subprocess.TimeoutExpired:
+        print(f"Timeout generating {invite_id}, skipping")
+    except subprocess.CalledProcessError as e:
+        print(f"Error generating {invite_id}: {e}")
 
 print("✅ All PDFs generated in /pdf folder")
