@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gift Certificate - Pledge for Landscaping</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #c5a059;
+            --dark: #1a1a1a;
+            --cream: #fffdf9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Playfair Display', serif;
+            padding: 20px;
+        }
+
+        .certificate-container {
+            background-color: var(--cream);
+            width: 1000px;
+            height: 700px;
+            padding: 40px;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+            border: 20px solid white;
+            outline: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        /* Border Ornaments */
+        .border-inner {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            bottom: 20px;
+            border: 2px solid var(--gold);
+            pointer-events: none;
+        }
+
+        .corner-ornament {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            fill: var(--gold);
+            opacity: 0.6;
+        }
+
+        .top-left { top: -10px; left: -10px; }
+        .top-right { top: -10px; right: -10px; transform: rotate(90deg); }
+        .bottom-left { bottom: -10px; left: -10px; transform: rotate(-90deg); }
+        .bottom-right { bottom: -10px; right: -10px; transform: rotate(180deg); }
+
+        /* Content Styling */
+        .header-section {
+            margin-bottom: 40px;
+        }
+
+        .title {
+            font-family: 'Cinzel', serif;
+            font-size: 3.5rem;
+            color: var(--dark);
+            letter-spacing: 8px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-family: 'Cinzel', serif;
+            font-size: 1.2rem;
+            color: var(--gold);
+            letter-spacing: 4px;
+            font-weight: 400;
+        }
+
+        .main-content {
+            max-width: 800px;
+            margin-bottom: 60px;
+        }
+
+        .certify-text {
+            font-size: 1.5rem;
+            line-height: 1.8;
+            color: var(--dark);
+            font-style: italic;
+        }
+
+        .honor-text {
+            font-family: 'Great Vibes', cursive;
+            font-size: 3.5rem;
+            color: var(--gold);
+            margin-top: 20px;
+        }
+
+        .signature-section {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 40px;
+        }
+
+        .signature-line {
+            width: 300px;
+            border-bottom: 2px solid var(--dark);
+            margin-bottom: 10px;
+        }
+
+        .signature-label {
+            font-family: 'Cinzel', serif;
+            font-size: 1.2rem;
+            letter-spacing: 3px;
+            font-weight: 700;
+        }
+
+        @media print {
+            body {
+                background: none;
+                padding: 0;
+            }
+            .certificate-container {
+                box-shadow: none;
+                width: 100%;
+                height: 100vh;
+                border: none;
+            }
+            @page {
+                size: landscape;
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="certificate-container">
+        <div class="border-inner"></div>
+        
+        <!-- Ornaments -->
+        <svg class="corner-ornament top-left" viewBox="0 0 100 100">
+            <path d="M0,0 Q50,0 50,50 T100,100 M0,0 Q0,50 50,50 T100,100" fill="none" stroke="currentColor" stroke-width="0.5"/>
+            <circle cx="20" cy="20" r="2"/>
+            <path d="M0,0 L30,30 M0,10 L20,30 M10,0 L30,20" stroke="currentColor" stroke-width="0.5"/>
+        </svg>
+        <svg class="corner-ornament top-right" viewBox="0 0 100 100">
+            <path d="M0,0 Q50,0 50,50 T100,100 M0,0 Q0,50 50,50 T100,100" fill="none" stroke="currentColor" stroke-width="0.5"/>
+            <circle cx="20" cy="20" r="2"/>
+            <path d="M0,0 L30,30 M0,10 L20,30 M10,0 L30,20" stroke="currentColor" stroke-width="0.5"/>
+        </svg>
+        <svg class="corner-ornament bottom-left" viewBox="0 0 100 100">
+            <path d="M0,0 Q50,0 50,50 T100,100 M0,0 Q0,50 50,50 T100,100" fill="none" stroke="currentColor" stroke-width="0.5"/>
+            <circle cx="20" cy="20" r="2"/>
+            <path d="M0,0 L30,30 M0,10 L20,30 M10,0 L30,20" stroke="currentColor" stroke-width="0.5"/>
+        </svg>
+        <svg class="corner-ornament bottom-right" viewBox="0 0 100 100">
+            <path d="M0,0 Q50,0 50,50 T100,100 M0,0 Q0,50 50,50 T100,100" fill="none" stroke="currentColor" stroke-width="0.5"/>
+            <circle cx="20" cy="20" r="2"/>
+            <path d="M0,0 L30,30 M0,10 L20,30 M10,0 L30,20" stroke="currentColor" stroke-width="0.5"/>
+        </svg>
+
+        <div class="header-section">
+            <h1 class="title">PLEDGE FOR LANDSCAPING</h1>
+            <p class="subtitle">A SPECIAL GIFT FOR KUF MUNYINDA</p>
+        </div>
+
+        <div class="main-content">
+            <p class="certify-text">
+                This is to certify that the family pledges to Landscape the front part of <br>
+                <strong>The Nest</strong> to honour you on your
+            </p>
+            <h2 class="honor-text">70th Birthday</h2>
+        </div>
+
+        <div class="signature-section">
+            <div class="signature-line"></div>
+            <p class="signature-label">FAMILY</p>
+        </div>
+    </div>
+</body>
+</html>
